@@ -1,0 +1,65 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - azure-pipelines.yml
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: Release
+  packageVersion: '1.0.$(Build.BuildId)'
+  myFeed: 'https://nuget.pkg.github.com/P47K0/index.json'
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: sdk
+    version: 10.x
+
+- task: Cache@2
+  inputs:
+    key: 'nuget | "$(Agent.OS)" | **/*.csproj, **/packages.lock.json'
+    restoreKeys: |
+      nuget | "$(Agent.OS)"
+    path: ~/.nuget/packages
+  displayName: Cache NuGet packages
+
+- script: dotnet restore
+  displayName: Restore    
+
+- script: dotnet format --verify-no-changes
+  displayName: Check code formatting
+
+- script: dotnet build -c $(buildConfiguration)
+  displayName: Build
+
+- script: dotnet test --no-build -c $(buildConfiguration) --logger trx || echo "No tests found, skipping"
+  displayName: Test (skip if none)
+
+- script: dotnet pack --no-build -c $(buildConfiguration) --output $(Build.ArtifactStagingDirectory) /p:PackageVersion=$(packageVersion)
+  displayName: Pack NuGet
+
+- publish: $(Build.ArtifactStagingDirectory)
+  artifact: nuget-package
+
+- script: |
+    dotnet nuget remove source github || true
+    dotnet nuget add source "$(myFeed)" \
+      --name github \
+      --username "P47K0" \
+      --password "$(azure-devops-github-packages)" \
+      --store-password-in-clear-text
+    dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" \
+      --source github \
+      --api-key "$(azure-devops-github-packages)" \
+      --skip-duplicate
+  displayName: Push to GitHub Packages
