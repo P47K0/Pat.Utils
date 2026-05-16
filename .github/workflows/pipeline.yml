@@ -62,7 +62,6 @@ jobs:
 
       - name: Install SonarScanner for .NET 5.15.0
         run: |
-          dotnet tool uninstall --global dotnet-sonarscanner
           dotnet tool install --global dotnet-sonarscanner --version 5.15.0
 
       - name: Add GitHub Packages source
