@@ -74,7 +74,7 @@ jobs:
         run: |
           ./.sonar/scanner/dotnet-sonarscanner begin \
             /k:"Pat.Utils" \
-            /o:P47K0 \
+            /o:p47k0 \
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
             /d:sonar.scanner.sonarcloudUrl="${{ secrets.SONAR_HOST_URL }}" \
