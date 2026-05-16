@@ -40,6 +40,11 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      - name: Install SonarScanner for .NET 5.15.0 locally
+        run: |
+          mkdir -p ./.sonar/tools
+          dotnet tool install --tool-path ./.sonar/tools dotnet-sonarscanner --version 5.15.0
+
       - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
@@ -71,7 +76,7 @@ jobs:
 
       - name: SonarQube begin
         run: |
-          dotnet sonarscanner begin \
+            ./.sonar/tools/dotnet-sonarscanner begin \
             /k:"Pat.Utils" \
             /o:p47k0 \
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
@@ -89,7 +94,7 @@ jobs:
         run: dotnet test --configuration Release --no-build --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura,opencover
 
       - name: SonarQube end
-        run: ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+        run: ./.sonar/tools/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
