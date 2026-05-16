@@ -42,8 +42,14 @@ steps:
 - script: dotnet build -c $(buildConfiguration)
   displayName: Build
 
-- script: dotnet test --no-build -c $(buildConfiguration) --logger trx || echo "No tests found, skipping"
+- script: dotnet test --no-build -c $(buildConfiguration) --collect:"XPlat Code Coverage" --logger trx || echo "No tests found, skipping"
   displayName: Test (skip if none)
+
+- task: PublishCodeCoverageResults@2
+  displayName: Publish code coverage
+  inputs:
+    summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+    failIfCoverageEmpty: true
 
 - script: dotnet pack --no-build -c $(buildConfiguration) --output $(Build.ArtifactStagingDirectory) /p:PackageVersion=$(packageVersion)
   displayName: Pack NuGet
