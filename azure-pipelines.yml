@@ -4,13 +4,19 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - azure-pipelines.yml
 
 pool:
   vmImage: ubuntu-latest
 
 variables:
   buildConfiguration: Release
+  packageVersion: '1.0.$(Build.BuildId)'
   myFeed: 'https://nuget.pkg.github.com/P47K0/index.json'
 
 steps:
@@ -19,8 +25,19 @@ steps:
     packageType: sdk
     version: 10.x
 
+- task: Cache@2
+  inputs:
+    key: 'nuget | "$(Agent.OS)" | **/*.csproj, **/packages.lock.json'
+    restoreKeys: |
+      nuget | "$(Agent.OS)"
+    path: ~/.nuget/packages
+  displayName: Cache NuGet packages
+
 - script: dotnet restore
   displayName: Restore    
+
+- script: dotnet format --verify-no-changes
+  displayName: Check code formatting
 
 - script: dotnet build -c $(buildConfiguration)
   displayName: Build
@@ -28,7 +45,7 @@ steps:
 - script: dotnet test --no-build -c $(buildConfiguration) --logger trx || echo "No tests found, skipping"
   displayName: Test (skip if none)
 
-- script: dotnet pack --no-build -c $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
+- script: dotnet pack --no-build -c $(buildConfiguration) --output $(Build.ArtifactStagingDirectory) /p:PackageVersion=$(packageVersion)
   displayName: Pack NuGet
 
 - publish: $(Build.ArtifactStagingDirectory)
