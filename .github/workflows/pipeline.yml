@@ -73,11 +73,7 @@ jobs:
           name: coverage-html
           path: ./coverage-report
 
-      - run: dotnet pack ${{ env.PROJECT_PATH }} \
-          --configuration Release \
-          --no-build \
-          -o ./artifacts \
-          -p:PackageVersion=${{ env.PACKAGE_VERSION }}
+      - run: dotnet pack ${{ env.PROJECT_PATH }} --configuration Release --no-build -o ./artifacts -p:PackageVersion=${{ env.PACKAGE_VERSION }}
 
       - name: Push package
         run: dotnet nuget push "./artifacts/*.nupkg" --source github --skip-duplicate
