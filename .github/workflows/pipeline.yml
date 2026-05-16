@@ -10,14 +10,14 @@ on:
       - "build/**"
       - "**.csproj"
       - "**.sln"
-      - "!**.github/workflows/pipeline.yml"
+      - "!**/.github/workflows/pipeline.yml"
   workflow_dispatch:
 
 env:
   NUGET_FEED_URL: "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
   PACKAGE_VERSION: 1.0.${{ github.run_number }}
   PROJECT_PATH: Pat.Utils/Pat.Utils.csproj
-  
+
 jobs:
   build-pack-publish:
     runs-on: ubuntu-latest
@@ -26,8 +26,6 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v6     
-
       - name: Checkout
         uses: actions/checkout@v6
 
@@ -36,14 +34,19 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
       - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-      
+
       - name: Cache SonarScanner
         id: cache-sonar-scanner
         uses: actions/cache@v4
@@ -51,27 +54,12 @@ jobs:
           path: ./.sonar/scanner
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
-      
+
       - name: Install SonarScanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         run: |
           mkdir -p ./.sonar/scanner
           dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
-      
-      - name: SonarQube begin
-        run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin \
-            /k:"Pat.Utils" \
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
-            /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
-            /d:sonar.cs.vstest.reportsPaths="**/*.trx" \
-            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
-
-      
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "10.0.x"
 
       - name: Add GitHub Packages source
         run: |
@@ -82,6 +70,15 @@ jobs:
             --name github \
             "${{ env.NUGET_FEED_URL }}"
 
+      - name: SonarQube begin
+        run: |
+          ./.sonar/scanner/dotnet-sonarscanner begin \
+            /k:"Pat.Utils" \
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
+            /d:sonar.cs.vstest.reportsPaths="**/*.trx" \
+            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+
       - name: Restore
         run: dotnet restore
 
@@ -89,13 +86,18 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test --configuration Release --no-build --collect:"XPlat Code Coverage"
-      
+        run: dotnet test --configuration Release --no-build --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura,opencover
+
+      - name: SonarQube end
+        run: ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage
-          path: '**/TestResults/coverage.cobertura.xml'
+          path: |
+            **/coverage.cobertura.xml
+            **/coverage.opencover.xml
 
       - name: Generate HTML coverage report
         uses: danielpalme/ReportGenerator-GitHub-Action@5
@@ -103,17 +105,15 @@ jobs:
           reports: '**/coverage.cobertura.xml'
           targetdir: './coverage-report'
           reporttypes: 'HtmlInline'
-            
+
       - name: Upload HTML report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-html
           path: ./coverage-report
 
-      - run: dotnet pack ${{ env.PROJECT_PATH }} --configuration Release --no-build -o ./artifacts -p:PackageVersion=${{ env.PACKAGE_VERSION }}
+      - name: Pack
+        run: dotnet pack ${{ env.PROJECT_PATH }} --configuration Release --no-build -o ./artifacts -p:PackageVersion=${{ env.PACKAGE_VERSION }}
 
       - name: Push package
         run: dotnet nuget push "./artifacts/*.nupkg" --source github --skip-duplicate
-
-          
-          
