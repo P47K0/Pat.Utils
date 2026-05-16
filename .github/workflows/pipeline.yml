@@ -16,7 +16,7 @@ on:
 env:
   NUGET_FEED_URL: "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
   PACKAGE_VERSION: 1.0.${{ github.run_number }}
-  PROJECT_PATH: src/Pat.Utils/Pat.Utils.csproj
+  PROJECT_PATH: Pat.Utils/Pat.Utils.csproj
   
 jobs:
   build-pack-publish:
