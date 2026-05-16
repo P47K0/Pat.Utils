@@ -10,29 +10,23 @@ namespace QVend.Ecr.Communication.TerminalMessages.Extensions
     {
         public static byte[] GetValueBytes(this byte[] source)
         {
-            byte[] result = TrimEnd(source);
-
-            if (BitConverter.IsLittleEndian)
-            {
-                Array.Reverse(result);
-            }
-
-            return result;
+            return source ?? new byte[0];
         }
 
         public static byte[] GetValueBytesBcd(this byte[] source)
         {
-            return TrimStart(source);
+            return source ?? new byte[0];
         }
 
-        public static string? ToHexString(this byte[] bytes)
+        public static string ToHexString(this byte[] bytes)
         {
             if (bytes == null)
-                return null;
-            StringBuilder hex = new StringBuilder(bytes.Length * 2);
-            foreach (byte b in bytes)
-                hex.AppendFormat("{0:x2}", b);
-            return hex.ToString();
+                return string.Empty;
+
+            var sb = new StringBuilder(bytes.Length * 2);
+            foreach (var b in bytes)
+                sb.Append(b.ToString("x2"));
+            return sb.ToString();
         }
 
         private static byte[] TrimStart(byte[] array)

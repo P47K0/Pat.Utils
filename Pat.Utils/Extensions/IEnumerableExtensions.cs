@@ -13,6 +13,9 @@ namespace QVend.Ecr.Communication.TerminalMessages.Extensions
     {
         public static int CalculateHashCode<T>(this IEnumerable<T> source, int start = 17)
         {
+            if (source == null)
+                return start;
+
             int result = start;
             
             foreach (var item in source)
@@ -28,6 +31,9 @@ namespace QVend.Ecr.Communication.TerminalMessages.Extensions
 
         public static int CalculateHashCode(this IEnumerable source, int start = 17)
         {
+            if (source == null)
+                return start;
+
             int result = start;
 
             foreach (var item in source)
