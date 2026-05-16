@@ -1,3 +1,4 @@
+using QVend.Ecr.Communication.TerminalMessages.Extensions;
 using Xunit;
 
 namespace Pat.Utils.Tests.Extensions

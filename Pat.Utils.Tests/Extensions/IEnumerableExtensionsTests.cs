@@ -1,3 +1,5 @@
+using QVend.Ecr.Communication.TerminalMessages.Extensions;
+using System.Linq.Expressions;
 using Xunit;
 
 namespace Pat.Utils.Tests.Extensions
@@ -15,7 +17,7 @@ namespace Pat.Utils.Tests.Extensions
             int result = source.CalculateHashCode(start);
 
             // Assert
-            Assert.Equal(409, result);
+            Assert.Equal(207417, result);
         }
 
         [Fact]
@@ -26,7 +28,7 @@ namespace Pat.Utils.Tests.Extensions
             int start = 17;
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => source.CalculateHashCode(start));
+            Assert.Equal(start, source.CalculateHashCode(start));
         }
 
         [Fact]

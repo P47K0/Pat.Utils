@@ -1,13 +1,7 @@
-﻿using System;
+﻿using QVend.Ecr.Communication.TerminalMessages.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Text;
-
-namespace Pat.Utils.Tests.Extensions
-{
-    public class ByteExtensionsTests
-    {
-    }
-}
 using Xunit;
 
 namespace Pat.Utils.Tests.Extensions
