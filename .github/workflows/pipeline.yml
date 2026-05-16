@@ -55,11 +55,10 @@ jobs:
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
 
-      - name: Install SonarScanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+      - name: Install SonarScanner for .NET 5.15.0
         run: |
-          mkdir -p ./.sonar/scanner
-          dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
+          dotnet tool uninstall --global dotnet-sonarscanner
+          dotnet tool install --global dotnet-sonarscanner --version 5.15.0
 
       - name: Add GitHub Packages source
         run: |
@@ -72,11 +71,11 @@ jobs:
 
       - name: SonarQube begin
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin \
+          dotnet sonarscanner begin \
             /k:"Pat.Utils" \
             /o:p47k0 \
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
-            /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
+            /d:sonar.host.url="${{ secrets.SONAR_URL }}" \
             /d:sonar.cs.vstest.reportsPaths="**/*.trx" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
