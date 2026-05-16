@@ -24,7 +24,7 @@ namespace QVend.Ecr.Communication.TerminalMessages.Extensions
         };
 
         public static Type GetNonNullableType(this Type source)
-        {            
+        {
             Type underLyingType = Nullable.GetUnderlyingType(source);
             if (underLyingType != null)
             {
@@ -38,10 +38,10 @@ namespace QVend.Ecr.Communication.TerminalMessages.Extensions
         {
             if (source == null)
                 return true;
-            
+
             Type type = typeof(T);
-            
-            return IsNullable(type);                        
+
+            return IsNullable(type);
         }
 
         public static bool IsNullable(this Type source)

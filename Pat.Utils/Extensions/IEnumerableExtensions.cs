@@ -17,7 +17,7 @@ namespace QVend.Ecr.Communication.TerminalMessages.Extensions
                 return start;
 
             int result = start;
-            
+
             foreach (var item in source)
             {
                 if (item != null)
@@ -55,13 +55,13 @@ namespace QVend.Ecr.Communication.TerminalMessages.Extensions
             {
                 return false;
             }
-            
+
             if (value == null)
             {
                 return false;
             }
 
-            return source.SequenceEqual(value);            
+            return source.SequenceEqual(value);
         }
 
         public static bool SequenceEqualNullSafe(this IEnumerable source, IEnumerable value)
@@ -86,7 +86,7 @@ namespace QVend.Ecr.Communication.TerminalMessages.Extensions
 
         public static string Concatenate<T>(this IEnumerable<T> source, string separator, Expression<Func<T, string>> predicate)
         {
-            return string.Join(separator, source);            
+            return string.Join(separator, source);
         }
     }
 }
