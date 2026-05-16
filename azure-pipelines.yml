@@ -28,12 +28,15 @@ steps:
 - script: dotnet restore
   displayName: Restore  
 
+- script: mkdir -p /home/vsts/.nuget/packages
+  displayName: Ensure NuGet cache folder exists
+
 - task: Cache@2
   inputs:
     key: 'nuget | "$(Agent.OS)" | **/*.csproj, **/packages.lock.json'
     restoreKeys: |
       nuget | "$(Agent.OS)"
-    path: ~/.nuget/packages
+    path: /home/vsts/.nuget/packages
   displayName: Cache NuGet packages
 
 - script: dotnet format --verify-no-changes
