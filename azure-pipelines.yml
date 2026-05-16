@@ -11,7 +11,7 @@ pool:
 
 variables:
   buildConfiguration: Release
-  myPrivateFeed: 'https://nuget.pkg.github.com/P47K0/index.json'
+  myFeed: 'https://nuget.pkg.github.com/P47K0/index.json'
 
 steps:
 - task: UseDotNet@2
@@ -19,14 +19,30 @@ steps:
     packageType: sdk
     version: 10.x
 
+- script: dotnet restore
+  displayName: Restore    
+
 - script: dotnet build -c $(buildConfiguration)
   displayName: Build
 
 - script: dotnet test --no-build -c $(buildConfiguration) --logger trx || echo "No tests found, skipping"
   displayName: Test (skip if none)
 
-- script: dotnet pack --no-build -c $(buildConfiguration)
+- script: dotnet pack --no-build -c $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
   displayName: Pack NuGet
 
-- script: dotnet nuget push **/*.nupkg --source $(myPrivateFeed) --api-key Az --skip-duplicate
-  displayName: Push to private NuGet feed
+- publish: $(Build.ArtifactStagingDirectory)
+  artifact: nuget-package
+
+- script: |
+    dotnet nuget remove source github || true
+    dotnet nuget add source "$(myFeed)" \
+      --name github \
+      --username "P47K0" \
+      --password "$(azure-devops-github-packages)" \
+      --store-password-in-clear-text
+    dotnet nuget push "$(Build.ArtifactStagingDirectory)/*.nupkg" \
+      --source github \
+      --api-key "$(azure-devops-github-packages)" \
+      --skip-duplicate
+  displayName: Push to GitHub Packages
