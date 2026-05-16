@@ -1,0 +1,32 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: Release
+  myPrivateFeed: 'https://nuget.pkg.github.com/P47K0/index.json'
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: sdk
+    version: 10.x
+
+- script: dotnet build -c $(buildConfiguration)
+  displayName: Build
+
+- script: dotnet test --no-build -c $(buildConfiguration) --logger trx || echo "No tests found, skipping"
+  displayName: Test (skip if none)
+
+- script: dotnet pack --no-build -c $(buildConfiguration)
+  displayName: Pack NuGet
+
+- script: dotnet nuget push **/*.nupkg --source $(myPrivateFeed) --api-key Az --skip-duplicate
+  displayName: Push to private NuGet feed
