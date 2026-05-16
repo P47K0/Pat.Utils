@@ -75,7 +75,7 @@ jobs:
             /k:"Pat.Utils" \
             /o:p47k0 \
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
-            /d:sonar.host.url="${{ secrets.SONAR_URL }}" \
+            /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
             /d:sonar.cs.vstest.reportsPaths="**/*.trx" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
