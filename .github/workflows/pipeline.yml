@@ -11,6 +11,7 @@ on:
       - "**.csproj"
       - "**.sln"
       - "!**.github/workflows/pipeline.yml"
+  workflow_dispatch:
 
 env:
   NUGET_FEED_URL: "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
