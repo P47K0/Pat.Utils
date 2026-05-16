@@ -25,6 +25,9 @@ steps:
     packageType: sdk
     version: 10.x
 
+- script: dotnet restore
+  displayName: Restore  
+
 - task: Cache@2
   inputs:
     key: 'nuget | "$(Agent.OS)" | **/*.csproj, **/packages.lock.json'
@@ -32,9 +35,6 @@ steps:
       nuget | "$(Agent.OS)"
     path: ~/.nuget/packages
   displayName: Cache NuGet packages
-
-- script: dotnet restore
-  displayName: Restore    
 
 - script: dotnet format --verify-no-changes
   displayName: Check code formatting
