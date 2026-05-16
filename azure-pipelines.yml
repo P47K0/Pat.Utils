@@ -48,7 +48,7 @@ steps:
 - task: PublishCodeCoverageResults@2
   displayName: Publish code coverage
   inputs:
-    summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+    summaryFileLocation: '$(Build.SourcesDirectory)/**/coverage.cobertura.xml'
     failIfCoverageEmpty: true
 
 - script: dotnet pack --no-build -c $(buildConfiguration) --output $(Build.ArtifactStagingDirectory) /p:PackageVersion=$(packageVersion)
